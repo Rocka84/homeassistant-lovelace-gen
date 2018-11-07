@@ -1,0 +1,6 @@
+name: Bathroom
+title: Bathroom
+id: bathroom
+icon: mdi:bath-empty
+cards:
+  - {{ light_glance("bathroom_lamp") }}

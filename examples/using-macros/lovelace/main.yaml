@@ -1,0 +1,5 @@
+name: Home
+views:
+  - !include bedroom.yaml
+  - !include bathroom.yaml
+  - !include kitchen.yaml

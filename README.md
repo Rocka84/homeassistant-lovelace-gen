@@ -23,7 +23,7 @@ In your configuration.yaml file, make a shell command:
 ```yaml
 shell_command:
   lovelace_gen: 'python /config/lovelace-gen.py'
-  ```
+```
 
 Restart Home Assistant. Then run the service `shell_command.lovelace_gen`, preferably from `<hass_ip_address:port>/dev-service`.
 
@@ -54,6 +54,9 @@ The following commands can be used in `lovelace/main.yaml` or any file included 
 - `!resource [<path>/]<filename>` will copy the file `lovelace/<path>/<filename>` to `www/lovelace/<filename>` and be replaced with `/local/lovelace/<filename>`. A timestamp will be added after the url to make sure any cache of the file is invalidated between runs.
 - [jinja2 templates](http://jinja.pocoo.org/docs/2.10/templates/) allows for variables, loops, macros and flow controll.
 
+## Global macros
+If you have a file `lovelace/macros.yaml` its content is prepended to all included files before processing the jinja2 templates.
+This makes it possible to define macros that can be used in all files. Have a look at `examples/using-macros/`.
 
 ## Example
 
@@ -181,3 +184,7 @@ excluded_entities:
 ```
 
 It doesn't work exactly like in home-assistant templates... you'll have to experiment a bit.
+
+## More Examples
+
+See the `examples` folder

@@ -1,0 +1,31 @@
+{% macro light_profile(entity, profile, name, icon="lightbulb") -%}
+{
+  entity: light.{{ entity }},
+  name: {{ name }},
+  icon: "mdi:{{ icon }}",
+  tap_action: call-service,
+  service: light.turn_on,
+  service_data: {
+    entity_id: light.{{ entity }},
+    profile: {{ profile }},
+  }
+}
+{%- endmacro %}
+
+{% macro light_glance(entity, name="Lamp") -%}
+{
+  type: glance,
+  show_state: false,
+  columns: 4,
+  entities: [
+    {
+      entity: light.{{ entity }},
+      name: {{ name }},
+      tap_action: toggle
+    },
+    {{ light_profile(entity, "bright", "Bright", "lightbulb-on") }},
+    {{ light_profile(entity, "normal", "Normal", "lightbulb-on-outline") }},
+    {{ light_profile(entity, "night", "Night", "lightbulb-outline") }},
+  ]
+}
+{%- endmacro %}

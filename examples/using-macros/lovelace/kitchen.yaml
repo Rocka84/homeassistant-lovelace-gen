@@ -1,0 +1,18 @@
+name: "Kitchen"
+title: "Kitchen"
+id: kitchen
+icon: mdi:silverware-variant
+cards:
+  - type: glance
+    show_state: false
+    columns: 4
+    entities:
+      - entity: light.kitchen_leds
+        icon: mdi:led-outline
+        name: LEDs
+        tap_action: toggle
+      - entity: light.kitchen_lamp
+        name: Lamp
+        tap_action: toggle
+      - {{ light_profile("kitchen_lamp", "bright", "Bright", "lightbulb-on") }}
+      - {{ light_profile("kitchen_lamp", "night", "Night", "lightbulb-outline") }}
