@@ -38,6 +38,8 @@ import json
 indir = "lovelace"
 infile = "main.yaml"
 secretsfile = "secrets.yaml"
+macrosfile = "macros.yaml"
+macros = ""
 
 outfile = "ui-lovelace.yaml"
 
@@ -59,12 +61,25 @@ Special commands:
     Copies the file lovelace/<path><filename> to www/lovelace/<filename> and is replaced with /local/lovelace/<filename>
 """
 
+def load_macros():
+    global indir, macros, macrosfile
+    file = "{}/{}".format(indir, macrosfile);
+    if not os.path.exists(file):
+        return
+    try:
+        with open(file, 'r') as fp:
+            macros = fp.read()
+    except Exception as e:
+        print("Failed loading macros.", file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(2)
+
 def include_statement(loader, node):
     global indir, states
     filename = loader.construct_scalar(node)
     with open("{}/{}".format(indir, filename), 'r') as fp:
         data = fp.read()
-    template = jinja2.Template(data)
+    template = jinja2.Template(macros + data)
     retval = yaml.load(template.render(states=states))
     return retval
 yaml.add_constructor('!include', include_statement)
@@ -137,6 +152,7 @@ def main(argv):
         print("Run `{} help` for help.".format(argv[0]), file=sys.stderr)
         sys.exit(2)
 
+    load_macros()
 
     try:
         with open(infile, 'r') as fp:
