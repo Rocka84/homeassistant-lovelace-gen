@@ -34,6 +34,7 @@ import time
 import jinja2
 import requests
 import json
+from typing import Any, IO
 
 indir = "lovelace"
 infile = "main.yaml"
@@ -61,6 +62,20 @@ Special commands:
     Copies the file lovelace/<path><filename> to www/lovelace/<filename> and is replaced with /local/lovelace/<filename>
 """
 
+class Loader(yaml.SafeLoader):
+    """YAML Loader with `!include` constructor."""
+
+    def __init__(self, stream: IO) -> None:
+        """Initialise Loader."""
+
+        try:
+            self._root = os.path.split(stream.name)[0]
+        except AttributeError:
+            self._root = os.path.curdir
+
+        super().__init__(stream)
+
+
 def load_macros():
     global indir, macros, macrosfile
     file = "{}/{}".format(indir, macrosfile);
@@ -80,18 +95,18 @@ def include_statement(loader, node):
     with open("{}/{}".format(indir, filename), 'r') as fp:
         data = fp.read()
     template = jinja2.Template(macros + data)
-    retval = yaml.load(template.render(states=states))
+    retval = yaml.load(template.render(states=states), Loader)
     return retval
-yaml.add_constructor('!include', include_statement)
+yaml.add_constructor('!include', include_statement, Loader)
 
 def secret_statement(loader, node):
     with open(secretsfile, 'r') as fp:
         data = fp.read()
-    data = yaml.load(data)
+    data = yaml.load(data, Loader)
     if not node.value in data:
         raise yaml.scanner.ScannerError('Could not find secret {}'. format(node.value))
     return data[node.value]
-yaml.add_constructor('!secret', secret_statement)
+yaml.add_constructor('!secret', secret_statement, Loader)
 
 def resource_statement(loader, node):
     global indir, wwwdir, resourcedir, timestamp
@@ -110,7 +125,7 @@ def resource_statement(loader, node):
     shutil.copyfile(path, newpath)
     return includepath + '?' + str(timestamp) + version
 
-yaml.add_constructor('!resource', resource_statement)
+yaml.add_constructor('!resource', resource_statement, Loader)
 
 def get_states(base_url, password=""):
     global states
@@ -158,7 +173,7 @@ def main(argv):
         with open(infile, 'r') as fp:
             data = fp.read()
         template = jinja2.Template(data)
-        data = yaml.load(template.render(states=states))
+        data = yaml.load(template.render(states=states), Loader)
     except Exception as e:
         print("Something went wrong.", file=sys.stderr)
         print(e, file=sys.stderr)
